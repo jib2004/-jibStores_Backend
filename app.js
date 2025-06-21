@@ -14,8 +14,11 @@ import bodyParser from "body-parser"
 import http from "http"
 import { Server } from "socket.io"
 
+
 // Initialize dotenv first
 dotenv.config()
+
+
 
 const app = express()
 const server = http.createServer(app)
