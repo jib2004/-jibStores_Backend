@@ -41,8 +41,16 @@ app.use(
 )
 app.use(cookieParser())
 
-// Connect to database
-connectDb(process.env.MONGODB_URI)
+// Middleware to ensure database connection on each request
+app.use(async (req, res, next) => {
+  try {
+    await connectDb(process.env.MONGODB_URI)
+    next()
+  } catch (error) {
+    console.error("Database connection failed:", error)
+    res.status(500).json({ message: "Database connection failed" })
+  }
+})
 
 app.use(express.static("uploads")) // allows you access this file
 
