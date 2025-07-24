@@ -17,6 +17,10 @@ import { Server } from "socket.io"
 
 // Initialize dotenv first
 dotenv.config()
+const allowedOrigins = [
+  "http://localhost:3000", 
+  "https://your-production-domain.com"
+];
 
 
 
@@ -38,7 +42,7 @@ app.use(bodyParser.urlencoded({ extended: true }))
 
 app.use(
   cors({
-    origin: "*",
+    origin: allowedOrigins,
     credentials: true,
   }),
 )
