@@ -79,6 +79,8 @@ authRouter.post('/login',async(req,res)=>{
             const token =jwt.sign({userEmail:user.email},process.env.JWT_SECRET_KEY,{expiresIn:"24h" })
             res.cookie("token",token,{
                 httpOnly:true,
+                secure: true,
+                sameSite: 'strict',
             }).json({message:"Successfully logged in",data:user})
         } catch (error) {
             return res.status(400).json({message:"Invalid email or password"})

@@ -43,7 +43,7 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(
   cors({
     origin: allowedOrigins,
-    credentials: true,
+    credentials: true, //If credientials is true, the Access-Control-Allow-Origin header must not be set to '*'
   }),
 )
 app.use(cookieParser())
