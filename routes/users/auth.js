@@ -54,6 +54,13 @@ authRouter.post('/register', upload.array('profile',1) ,async(req,res)=>{
             // profilePicture:file[0],
             
         })
+
+        const token =jwt.sign({userEmail:user.email,userId:user._id},process.env.JWT_SECRET_KEY,{expiresIn:"24h" })
+            res.cookie("token",token,{
+                secure: true,//https only
+                sameSite: 'strict',
+                maxAge: 24 * 60 * 60 * 1000 // 24 hours
+            }).json({message:"Successfully logged in"})
     
         return res.status(201).json({ 
             message:"User created successfully",
@@ -79,8 +86,9 @@ authRouter.post('/login',async(req,res)=>{
             const token =jwt.sign({userEmail:user.email},process.env.JWT_SECRET_KEY,{expiresIn:"24h" })
             res.cookie("token",token,{
                 httpOnly:true,
-                secure: true,
+                secure: true,//https only
                 sameSite: 'strict',
+                maxAge: 24 * 60 * 60 * 1000 // 24 hours
             }).json({message:"Successfully logged in",data:user})
         } catch (error) {
             return res.status(400).json({message:"Invalid email or password"})
@@ -235,10 +243,18 @@ authRouter.post('/google-auth',async(req,res)=>{
         if(user){
             const token =jwt.sign({userEmail:user.email,userId:user._id},process.env.JWT_SECRET_KEY,{expiresIn:"24h" })
             res.cookie("token",token,{
-                httpOnly:true,
-            }).json({message:"Successfully logged in",data:user})
+                secure: true,//https only
+                sameSite: 'strict',
+                maxAge: 24 * 60 * 60 * 1000 // 24 hours
+            }).json({message:"Successfully logged in"})
         }else{
             const newUser = await userModel.create({name,email,profilePicture})
+            const token =jwt.sign({userEmail:newUser.email,userId:newUser._id},process.env.JWT_SECRET_KEY,{expiresIn:"24h" })
+            res.cookie("token",token,{
+                secure: true,//https only
+                sameSite: 'strict',
+                maxAge: 24 * 60 * 60 * 1000 // 24 hours
+            }).json({message:"Successfully logged in"})
             return res.status(201).json({ 
                 message:"User created successfully",
                 data:user
