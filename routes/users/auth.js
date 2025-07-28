@@ -57,7 +57,7 @@ authRouter.post('/register', upload.array('profile',1) ,async(req,res)=>{
 
         const token =jwt.sign({userEmail:user.email,userId:user._id},process.env.JWT_SECRET_KEY,{expiresIn:"24h" })
             res.cookie("token",token,{
-                httpOnly:false,
+                httpOnly:true,
                 secure: true,//https only
                 sameSite: 'strict',
                 maxAge: 24 * 60 * 60 * 1000 // 24 hours
@@ -86,7 +86,7 @@ authRouter.post('/login',async(req,res)=>{
             if(!isValidPassword) return res.status(400).json({message:"Invalid password"})
             const token =jwt.sign({userEmail:user.email},process.env.JWT_SECRET_KEY,{expiresIn:"24h" })
             res.cookie("token",token,{
-                httpOnly:false,
+                httpOnly:true,
                 secure: true,//https only
                 sameSite: 'strict',
                 maxAge: 24 * 60 * 60 * 1000 // 24 hours
@@ -244,7 +244,7 @@ authRouter.post('/google-auth',async(req,res)=>{
         if(user){
             const token =jwt.sign({userEmail:user.email,userId:user._id},process.env.JWT_SECRET_KEY,{expiresIn:"24h" })
             res.cookie("token",token,{
-                httpOnly:false,
+                httpOnly:true,
                 secure: true,//https only
                 sameSite: 'strict',
                 maxAge: 24 * 60 * 60 * 1000 // 24 hours
@@ -253,7 +253,7 @@ authRouter.post('/google-auth',async(req,res)=>{
             const newUser = await userModel.create({name,email,profilePicture})
             const token =jwt.sign({userEmail:newUser.email,userId:newUser._id},process.env.JWT_SECRET_KEY,{expiresIn:"24h" })
             res.cookie("token",token,{
-                httpOnly:false,
+                httpOnly:true,
                 secure: true,//https only
                 sameSite: 'strict',
                 maxAge: 24 * 60 * 60 * 1000 // 24 hours
