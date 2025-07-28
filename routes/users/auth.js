@@ -59,7 +59,7 @@ authRouter.post('/register', upload.array('profile',1) ,async(req,res)=>{
             res.cookie("token",token,{
                 httpOnly:true,
                 secure: true,//https only
-                sameSite: 'strict',
+                sameSite: 'none',
                 maxAge: 24 * 60 * 60 * 1000 // 24 hours
             }).json({message:"Successfully logged in"})
     
@@ -88,7 +88,7 @@ authRouter.post('/login',async(req,res)=>{
             res.cookie("token",token,{
                 httpOnly:true,
                 secure: true,//https only
-                sameSite: 'strict',
+                sameSite: 'none',
                 maxAge: 24 * 60 * 60 * 1000 // 24 hours
             }).json({message:"Successfully logged in",data:user})
         } catch (error) {
@@ -246,7 +246,7 @@ authRouter.post('/google-auth',async(req,res)=>{
             res.cookie("token",token,{
                 httpOnly:true,
                 secure: true,//https only
-                sameSite: 'strict',
+                sameSite: 'none',
                 maxAge: 24 * 60 * 60 * 1000 // 24 hours
             }).json({message:"Successfully logged in"})
         }else{
@@ -255,7 +255,7 @@ authRouter.post('/google-auth',async(req,res)=>{
             res.cookie("token",token,{
                 httpOnly:true,
                 secure: true,//https only
-                sameSite: 'strict',
+                sameSite: 'none',
                 maxAge: 24 * 60 * 60 * 1000 // 24 hours
             }).json({message:"Successfully logged in"})
             return res.status(201).json({ 
