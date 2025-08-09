@@ -19,7 +19,7 @@ import { Server } from "socket.io"
 dotenv.config()
 const allowedOrigins = [
   "http://localhost:3000", 
-  "https://your-production-domain.com"
+  "https://jib-stores-client.vercel.app/"
 ];
 
 

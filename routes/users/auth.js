@@ -34,11 +34,6 @@ authRouter.post('/register', upload.array('profile',1) ,async(req,res)=>{
        return  hashedAddress =  bcrypt.hashSync(address,10)
     }
 
-    // if(req.files?.length === 0){
-    //      file = imageUrlUploader(["https://media.istockphoto.com/id/1451587807/vector/user-profile-icon-vector-avatar-or-person-icon-profile-picture-portrait-symbol-vector.jpg?s=612x612&w=0&k=20&c=yDJ4ITX1cHMh25Lt1vI1zBn2cAKKAlByHBvPJ8gEiIg="])
-    // }else{
-    //     file = imageUrlUploader(req.files)
-    // }
 
     
 
@@ -51,16 +46,15 @@ authRouter.post('/register', upload.array('profile',1) ,async(req,res)=>{
             password:hashedPassword,
             phoneNumber:hashedNumber,
             address:hashedAddress ,
-            // profilePicture:file[0],
             
         })
 
         const token =jwt.sign({userEmail:user.email,userId:user._id},process.env.JWT_SECRET_KEY,{expiresIn:"24h" })
             res.cookie("token",token,{
                 httpOnly:true,
-                secure: true,//https only
+                secure: true,
                 sameSite: 'none',
-                maxAge: 24 * 60 * 60 * 1000 // 24 hours
+                maxAge: 24 * 60 * 60 * 1000 
             }).json({message:"Successfully logged in"})
     
         return res.status(201).json({ 
@@ -87,9 +81,9 @@ authRouter.post('/login',async(req,res)=>{
             const token =jwt.sign({userEmail:user.email},process.env.JWT_SECRET_KEY,{expiresIn:"24h" })
             res.cookie("token",token,{
                 httpOnly:true,
-                secure: true,//https only
+                secure: true, 
                 sameSite: 'none',
-                maxAge: 24 * 60 * 60 * 1000 // 24 hours
+                maxAge: 24 * 60 * 60 * 1000 
             }).json({message:"Successfully logged in",data:user})
         } catch (error) {
             return res.status(400).json({message:"Invalid email or password"})
