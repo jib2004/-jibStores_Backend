@@ -144,7 +144,6 @@ sellerRoute.post('/product/:id',verify,async(req,res)=>{
             })
         }
 
-        console.log(file)
          const product = await productModel.create({
             sellerName,
             title,
@@ -165,7 +164,8 @@ sellerRoute.post('/product/:id',verify,async(req,res)=>{
          })
     } catch (error) {
         return res.status(500).json({
-            message:"Internal Server Error: " + error
+            message:"Internal Server Error: " + error,
+            data:req.files
         })
     }
 

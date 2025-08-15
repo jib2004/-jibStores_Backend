@@ -384,6 +384,7 @@ authRouter.post('/payment-verification',verify,async (req,res)=>{
         if (transactionData.status === 'success') {
             // Payment was successful
             const user = await userModel.findOneAndUpdate({email},{
+                isSeller:true,
                 'subscription.isSubscriptionActive':true,
                 'subscription.gateway_response':transactionData.gateway_response,
                 'subscription.status':transactionData.status,
