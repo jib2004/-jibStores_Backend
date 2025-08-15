@@ -62,7 +62,7 @@ sellerRoute.get('/review/product/:sellerId/:id',verify,async(req,res)=>{
 })
 
 
-sellerRoute.post('/upload',verify,upload.array('files',12),async(req,res)=>{
+sellerRoute.post('/upload',upload.array('files',12),async(req,res)=>{
     const files = req.files;
    // Check if files exist
    if (!files || files.length === 0) {
@@ -86,7 +86,7 @@ try {
     });
 } catch (error) {
     console.log(error)
-     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ 
         message: "Internal Server Error: " + error
         
     });
@@ -106,7 +106,7 @@ sellerRoute.post('/product/:id',verify,async(req,res)=>{
          files = fileLink
     }
 
-    if( files.length > 12){
+    if( files.length >  12){
         return res.status(StatusCodes.BAD_REQUEST).json({
             message: 'Cannot take more than 12 images'
         })
