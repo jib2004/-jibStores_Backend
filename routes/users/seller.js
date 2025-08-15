@@ -62,7 +62,7 @@ sellerRoute.get('/review/product/:sellerId/:id',verify,async(req,res)=>{
 })
 
 
-sellerRoute.post('/upload',upload.array('files',12),async(req,res)=>{
+sellerRoute.post('/upload',verify,upload.array('files',12),async(req,res)=>{
     const files = req.files;
    // Check if files exist
    if (!files || files.length === 0) {
