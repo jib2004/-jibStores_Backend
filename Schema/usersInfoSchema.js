@@ -112,7 +112,11 @@ const userSchema = new Schema({
     wallet:{
         type:Object,
         default:{
-            balance:[0],
+            balance:0,
+            netBalance:0,
+            totalEarnings:0,
+            totalWithdrawn:0,
+            totalDeposited:0,
             currency:"NGN",
             lastTransaction: "",
             lastTransactionDate: "",

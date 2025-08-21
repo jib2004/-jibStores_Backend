@@ -15,6 +15,10 @@ import { StatusCodes } from 'http-status-codes'
 
 
   const authRouter = express.Router()
+
+
+
+
 authRouter.post('/register', upload.array('profile',1) ,async(req,res)=>{
     const {name,email,password,phoneNumber,address} = req.body
     let file = undefined
@@ -89,6 +93,26 @@ authRouter.post('/login',async(req,res)=>{
             return res.status(400).json({message:"Invalid email or password"})
         }
 })
+
+
+authRouter.get('/user-info/:id',verify,async(req,res)=>{
+    const {id} = req.params
+    try {
+        const user = await userModel.findById(id).select({
+            password:0,
+            otp:0,
+            __v:0,
+
+        })
+        if(!user) return res.status(404).json({message:"User not found"})
+        if(user.isBlocked) return res.status(403).json({message:"User is blocked"})
+        // if(!user.isVerified) return res.status(403).json({message:"User is not verified"})
+        return res.status(200).json({data:user,message:"User found successfully"})
+    } catch (error) {
+        return res.status(500).json({message:`Internal server error: ${error}`})
+    }
+
+  })
 
 
 authRouter.post("/send-otp",async(req,res)=>{
@@ -456,6 +480,8 @@ authRouter.post('/payment-verification',verify,async (req,res)=>{
     }
 
 })
+
+
 
 
 
