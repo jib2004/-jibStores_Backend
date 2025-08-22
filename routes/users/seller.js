@@ -360,7 +360,7 @@ sellerRoute.get('/orders/users/:sellerId',verify,async(req,res)=>{
         }
 
         return res.status(StatusCodes.OK).json({
-            data:findSellerOrders,
+            data:userOrders,
             message:'Orders found successfully'
         })
     } catch (error) {
