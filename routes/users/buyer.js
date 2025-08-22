@@ -317,6 +317,8 @@ buyerRoute.post('/create-order/:id',verify,async(req,res)=>{
             productDetails,
             reference,
         })
+
+        
         
         return res.status(StatusCodes.CREATED).json({
             message:"Successful",

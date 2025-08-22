@@ -6,6 +6,7 @@ import {StatusCodes,ReasonPhrases} from 'http-status-codes'
 import { imageUrlUploader } from '../../middleware/imageUrlConverter.js'
 import { upload } from '../../middleware/multer.js'
 import { imageDelete } from '../../middleware/cloudinaryDelete.js'
+import { Order } from '../../Schema/orderSchema.js'
 
 
 
@@ -324,3 +325,140 @@ sellerRoute.post('/delete-image-id',verify, async(req,res)=>{
     }
 
 })
+
+
+sellerRoute.get('/orders/users/:sellerId',verify,async(req,res)=>{
+    const {sellerId} = req.params
+    try {
+        const userOrders = await Order.find({
+            'productDetails.sellerId':sellerId
+        })
+
+        // console.log(userOrders[0].productDetails[0].sellerId.toString(), sellerId)
+        // console.log(userOrders)
+
+        /*
+        Check if the sellerId in the order matches the sellerId from the request.
+        If it does not match, return an unauthorized response.
+        Providing this check ensures that only the seller who owns the orders can view them.
+        Problem:  Products can be listed by multiple sellers, so we need to ensure that the sellerId in the order matches the sellerId from the request.
+        */
+        // const findSellerOrders = userOrders.filter(order =>
+        //     order.productDetails.filter(product => product.sellerId.toString() === sellerId)
+        // );
+
+        // if(userOrders[0].productDetails[0].sellerId.toString() !== sellerId){
+        //     return res.status(StatusCodes.UNAUTHORIZED).json({
+        //         message:'You are not authorized to view these orders'
+        //     })
+        // }
+
+        if(!userOrders || userOrders.length === 0){
+            return res.status(StatusCodes.NOT_FOUND).json({
+                message:'No orders found for this seller'
+            })
+        }
+
+        return res.status(StatusCodes.OK).json({
+            data:findSellerOrders,
+            message:'Orders found successfully'
+        })
+    } catch (error) {
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            message:"Internal Server Error: " + error
+        })
+    }
+})
+
+sellerRoute.put('/order/:orderNumber/:sellerId', async (req, res) => {
+    const { orderNumber, sellerId } = req.params;
+    const { orderStatus } = req.body;
+    
+    if (!orderStatus) {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+            message: 'Please provide order status'
+        });
+    }
+
+    try {
+        const order = await Order.findOne({
+            orderNumber,
+            'productDetails.sellerId': sellerId 
+        });
+
+        if (!order) {
+            return res.status(StatusCodes.NOT_FOUND).json({
+                message: 'No order found for this seller'
+            });
+        }
+
+        // Update order status
+        const updatedOrder = await Order.findOneAndUpdate(
+            {
+                orderNumber,
+                'productDetails.sellerId': sellerId 
+            },
+            { 
+                $set: { 
+                    'productDetails.$.orderStatus': orderStatus 
+                } 
+            },
+            { new: true }
+        );
+
+        // Credit seller's wallet when order is delivered
+        if (orderStatus === 'delivered') {
+            // Calculate total amount for this seller's products in the order
+            const sellerProducts = order.productDetails.filter(
+                product => product.sellerId === sellerId
+            );
+            
+            let totalAmount = 0;
+            sellerProducts.forEach(product => {
+                totalAmount += product.basePrice * product.quantity;
+            });
+
+            // Update seller's wallet
+            const updatedUser = await userModel.findByIdAndUpdate(
+                sellerId,
+                {
+                    $inc: { 
+                        'wallet.balance': totalAmount,
+                        'wallet.totalEarnings': totalAmount,
+                        'wallet.netBalance': totalAmount
+                    },
+                    $set: {
+                        'wallet.lastTransaction': `Payment for order ${orderNumber}`,
+                        'wallet.lastTransactionDate': new Date(),
+                        'wallet.lastTransactionAmount': totalAmount
+                    },
+                    $push: {
+                        sales: {
+                            orderNumber,
+                            amount: totalAmount,
+                            products: sellerProducts.map(p => ({
+                                productId: p.id,
+                                productName: p.productName,
+                                quantity: p.quantity,
+                                price: p.basePrice
+                            })),
+                            date: new Date()
+                        }
+                    }
+                },
+                { new: true }
+            );
+        }
+
+        return res.status(StatusCodes.OK).json({
+            data: updatedOrder,
+            message: 'Order status updated successfully',
+        
+        });
+    } catch (error) {
+        console.error('Order update error:', error);
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            message: "Internal Server Error: " + error.message
+        });
+    }
+});
