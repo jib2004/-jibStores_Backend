@@ -58,7 +58,7 @@ authRouter.post('/register', upload.array('profile',1) ,async(req,res)=>{
                 httpOnly:true,
                 secure: true,
                 sameSite: 'none',
-                maxAge: 24 * 60 * 60 * 1000 
+                // maxAge: 24 * 60 * 60 * 1000 
             }).json({message:"Successfully logged in"})
     
         return res.status(201).json({ 
@@ -87,7 +87,7 @@ authRouter.post('/login',async(req,res)=>{
                 httpOnly:true,
                 secure: true, 
                 sameSite: 'none',
-                maxAge: 24 * 60 * 60 * 1000 
+                // maxAge: 24 * 60 * 60 * 1000 
             }).json({message:"Successfully logged in",data:user})
         } catch (error) {
             return res.status(400).json({message:"Invalid email or password"})
