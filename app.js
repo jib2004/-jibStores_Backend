@@ -13,6 +13,7 @@ import { buyerRoute } from "./routes/users/buyer.js"
 import bodyParser from "body-parser"
 import http from "http"
 import { Server } from "socket.io"
+import { subscriptionChecker } from "./lib/subcriptionChecker.js"
 
 
 // Initialize dotenv first
@@ -40,6 +41,8 @@ app.use(express.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 
+
+
 app.use(
   cors({
     origin: allowedOrigins,
@@ -58,6 +61,9 @@ app.use(async (req, res, next) => {
     res.status(500).json({ message: "Database connection failed" })
   }
 })
+
+// Start the subscription checker cron job
+subscriptionChecker.start()
 
 app.use(express.static("uploads")) // allows you access this file
 
