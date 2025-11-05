@@ -15,6 +15,7 @@ import http from "http"
 import { Server } from "socket.io"
 import { subscriptionChecker } from "./lib/subcriptionChecker.js"
 import rateLimit from "express-rate-limit";
+import helmet from "helmet";
 
 
 // Initialize dotenv first
@@ -48,6 +49,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(limiter); // Apply the rate limiting middleware to all requests
+app.use(helmet()); // Apply security headers
 
 
 
