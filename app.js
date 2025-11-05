@@ -14,6 +14,7 @@ import bodyParser from "body-parser"
 import http from "http"
 import { Server } from "socket.io"
 import { subscriptionChecker } from "./lib/subcriptionChecker.js"
+import rateLimit from "express-rate-limit";
 
 
 // Initialize dotenv first
@@ -23,6 +24,12 @@ const allowedOrigins = [
   "https://jib-stores-client.vercel.app"
 ];
 
+// Apply rate limiting to all requests
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: "Too many requests from this IP, please try again later."
+});
 
 
 const app = express()
@@ -40,6 +47,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
+app.use(limiter); // Apply the rate limiting middleware to all requests
 
 
 
