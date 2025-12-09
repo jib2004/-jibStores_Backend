@@ -11,6 +11,7 @@ import { payment_model } from '../../Schema/paymentModel.js'
 import { upload } from '../../middleware/multer.js'
 import { imageUrlUploader } from '../../middleware/imageUrlConverter.js'
 import { StatusCodes } from 'http-status-codes'
+import { stat } from 'fs'
 
 
 
@@ -482,6 +483,9 @@ authRouter.post('/payment-verification',verify,async (req,res)=>{
 })
 
 
+authRouter.get('/cookie-check',verify,(req,res)=>{
+    return res.status(200).json({message:"User is authenticated",status:true})
+})
 
 
 
