@@ -349,3 +349,25 @@ buyerRoute.get('/order/:id',verify,async(req,res)=>{
 
 
 })
+
+buyerRoute.get('/search/:query',async(req,res)=>{
+    const {query} = req.params
+    try {
+        const searchResults = await productModel.find({ $text: { $search: query } }).select({
+                isInspected:0,
+                amountSold:0,
+                keywords:0,
+                isSold:0,
+                sellerId:0,
+                created_at:0
+        })
+        return res.status(StatusCodes.OK).json({
+            message:'Successful',
+            data:searchResults
+        })
+    }catch (error) {
+         return res.status(500).json({
+            message: "Internal Server Error: " + error
+        });
+    }
+})

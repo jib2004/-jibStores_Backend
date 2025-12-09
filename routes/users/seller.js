@@ -98,7 +98,7 @@ try {
 sellerRoute.post('/product/:id',verify,async(req,res)=>{
     const {id} = req.params
     
-    const {sellerName,title,price,description,category,stock,isDisCount,discountedPrice,fileLink,uploadedImage,keywords} = req.body
+    const {sellerName,title,price,description,category,stock,isDisCount,discountedPrice,fileLink,uploadedImage,keywords,sizes} = req.body
     let files = undefined
     let file = undefined
 
@@ -117,6 +117,14 @@ sellerRoute.post('/product/:id',verify,async(req,res)=>{
         return res.status(400).json({
             message:'Kindly fill in the field'
         })
+    }
+
+    if(category === 'fashion'){ 
+        if(!sizes || sizes.length === 0){
+            return res.status(400).json({
+                message:'Sizes are required for fashion category'
+            })
+        }
     }
 
     if(files){
@@ -156,7 +164,8 @@ sellerRoute.post('/product/:id',verify,async(req,res)=>{
             stock,
             isDisCount,
             discountedPrice,
-            keywords
+            keywords,
+            sizes 
          })
 
          return res.status(StatusCodes.CREATED).json({

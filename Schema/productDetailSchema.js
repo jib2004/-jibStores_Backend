@@ -79,6 +79,10 @@ const productSchema = new Schema({
         type:Boolean,
         default:false
     },
+    sizes:{
+        type:[String],
+        default:[]
+    }
     
 
 },
@@ -87,6 +91,12 @@ const productSchema = new Schema({
         createdAt:"created_at",
         updatedAt:"updated_at"
     }
+})
+
+productSchema.index({
+    title: 'text',
+    category: 'text',
+    keywords: 'text'
 })
 
 export const productModel = model('products',productSchema)
