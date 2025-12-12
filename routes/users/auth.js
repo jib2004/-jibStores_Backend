@@ -83,7 +83,7 @@ authRouter.post('/login',async(req,res)=>{
             if(!user) return res.status(400).json({message:"User not found"})
             const isValidPassword =  bcrypt.compareSync(password,user.password)
             if(!isValidPassword) return res.status(400).json({message:"Invalid password"})
-            const token =jwt.sign({userEmail:user.email},process.env.JWT_SECRET_KEY,{expiresIn:"30d" })
+            const token =jwt.sign({userEmail:user.email},process.env.JWT_SECRET_KEY,{expiresIn:"20s" })
             res.cookie("token",token,{
                 httpOnly:true,
                 secure: true, 
@@ -439,7 +439,6 @@ authRouter.post('/payment-verification',verify,async (req,res)=>{
                 payment = await payment_model.create({
                     userId:user._id,
                     transactionHistory:[transactionData]
-                    
                 })
             }
 
@@ -483,7 +482,7 @@ authRouter.post('/payment-verification',verify,async (req,res)=>{
 })
 
 
-authRouter.get('/cookie-check',verify,(req,res)=>{
+authRouter.post('/cookie-check',verify,(req,res)=>{
     return res.status(200).json({message:"User is authenticated",status:true})
 })
 
