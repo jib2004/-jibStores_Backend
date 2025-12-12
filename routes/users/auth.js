@@ -83,7 +83,7 @@ authRouter.post('/login',async(req,res)=>{
             if(!user) return res.status(400).json({message:"User not found"})
             const isValidPassword =  bcrypt.compareSync(password,user.password)
             if(!isValidPassword) return res.status(400).json({message:"Invalid password"})
-            const token =jwt.sign({userEmail:user.email},process.env.JWT_SECRET_KEY,{expiresIn:"20s" })
+            const token =jwt.sign({userEmail:user.email},process.env.JWT_SECRET_KEY,{expiresIn:"30d" })
             res.cookie("token",token,{
                 httpOnly:true,
                 secure: true, 
