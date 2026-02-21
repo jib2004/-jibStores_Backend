@@ -16,6 +16,10 @@ import { Server } from "socket.io"
 import { subscriptionChecker } from "./lib/subcriptionChecker.js"
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
+import bidRouter from "./routes/users/bids.js"
+// import { getRedisClient } from "./lib/redisConnection.js"
+import { client } from "./lib/redisConnection.js"
+import paymentPlan from "./routes/admin/paymentPlan.js"
 
 
 // Initialize dotenv first
@@ -51,6 +55,11 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(limiter); // Apply the rate limiting middleware to all requests
 app.use(helmet()); // Apply security headers
 
+// let redisClient;
+
+// (async () => {
+//     redisClient = await getRedisClient();
+// })();
 
 
 app.use(
@@ -91,9 +100,15 @@ io.on("connection", (socket) => {
 
 app.get("/getImage", (req, res) => {})
 
+//Admin
+app.use("/admin/v1/payment-plan",paymentPlan)
+
+
+//Users
 app.use("/auth", authRouter)
 app.use("/seller", sellerRoute)
 app.use("/buyer", buyerRoute)
+app.use("/user/v1/bids", bidRouter)
 
 // For local development
 if (process.env.NODE_ENV !== "production") {

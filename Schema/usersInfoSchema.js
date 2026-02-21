@@ -122,6 +122,22 @@ const userSchema = new Schema({
             lastTransactionDate: "",
             lastTransactionAmount: 0
             }
+    },
+    bidSubscription:{
+        type:Object,
+        default:{
+            isSubscriptionActive:false,
+            id:0,
+            status:'',
+            reference:'',
+            amount:0,
+            currency:'NGN',
+            authorization_url:'',
+            gateway_response:'',
+            createdAt:'',
+            paidAt:'',
+            expiresAt:'',
+        }
     }
 
 },{
