@@ -7,6 +7,7 @@ Yes, I understand the codebase! This is a **Node.js/Express e-commerce backend s
 - **JWT authentication** with cookie-based sessions
 - **Cloudinary** for image storage and management
 - **Paystack** integration for payment processing
+- **Redis** integration for caching
 
 ## **Main Features**
 
@@ -58,5 +59,50 @@ Yes, I understand the codebase! This is a **Node.js/Express e-commerce backend s
 
 This appears to be a **marketplace platform** where users can be both buyers and sellers, with subscription-based seller plans and comprehensive e-commerce functionality. The code is well-structured with proper separation of concerns and includes essential features like payment processing, image management, and real-time notifications.
 
-To configure the generation, complete these steps:
+### **Payment Plan System** (`routes/admin/paymentPlan.js`)
 
+The platform includes a comprehensive **subscription-based payment plan system** for sellers:
+
+- **Plan Management**: Admin can create, update, cancel, and retrieve payment plans
+- **Plan Features**:
+  - Name and amount configuration
+  - Billing intervals: monthly, weekly, or yearly
+  - Multi-currency support (default: NGN)
+  - Plan status tracking (active/cancelled)
+  - Duration settings
+  - Flutterwave integration for payment processing
+- **API Endpoints**:
+  - `GET /:planId` - Retrieve a specific plan
+  - `GET /get-all-plans` - Fetch all available plans from Flutterwave
+  - `POST /create-plan` - Create a new payment plan
+  - `PUT /update-plan/:planId` - Update an existing plan
+  - `PUT /cancel-plan/:planId` - Cancel a subscription plan
+
+### **Bid System** (`routes/users/bids.js`)
+
+The marketplace includes a **real-time bidding system** for products:
+
+- **Bid Features**:
+  - Create bids with product name, description, starting price, and images
+  - Track current price and bid history
+  - Set bid end time for auction closing
+  - Only paid users can create bids
+  - Real-time bid placement with Redis caching
+- **Bid Schema Fields**:
+  - Product name and description
+  - Starting price and current price
+  - Multiple product images (up to 12)
+  - Bidder history with timestamps
+  - Status tracking (active/closed)
+  - Payment reference for winning bids
+- **API Endpoints**:
+
+  - `POST /create-bid/:id` - Create a new bid (requires paid user)
+  - `GET /get-bid/:id/:reference` - Retrieve a specific bid
+  - `PUT /place-bid/:id` - Place a bid on a product
+  - `GET /highest-bid/:id` - Get the highest bid for a product
+  - `GET /bid-list/:id/:reference` - Get all bids for a product
+
+- **Redis Integration**: Bids are cached in Redis for fast retrieval and real-time updates
+
+To configure the generation, complete these steps:
