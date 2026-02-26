@@ -18,7 +18,7 @@ import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 // import bidRouter from "./routes/users/bids.js"
 // import { getRedisClient } from "./lib/redisConnection.js"
-// import { client } from "./lib/redisConnection.js"
+import { client } from "./lib/redisConnection.js"
 import paymentPlan from "./routes/admin/paymentPlan.js"
 
 
@@ -78,7 +78,7 @@ app.use(async (req, res, next) => {
 })
 
 // Start the subscription checker cron job
-// subscriptionChecker.start()
+subscriptionChecker.start()
 
 app.use(express.static("uploads")) // allows you access this file
 
