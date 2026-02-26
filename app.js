@@ -18,7 +18,7 @@ import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 // import bidRouter from "./routes/users/bids.js"
 // import { getRedisClient } from "./lib/redisConnection.js"
-import { client } from "./lib/redisConnection.js"
+// import { client } from "./lib/redisConnection.js"
 import paymentPlan from "./routes/admin/paymentPlan.js"
 
 
@@ -36,6 +36,8 @@ const limiter = rateLimit({
   message: "Too many requests from this IP, please try again later."
 });
 
+
+export const redis_url = process.env.REDIS_URL
 
 const app = express()
 const server = http.createServer(app)
