@@ -1,3 +1,4 @@
+import 'dotenv/config' // Added this here so it can load all the env variables before all other lib so i can get them in modules
 import express from "express"
 import dotenv from "dotenv"
 import cors from "cors"
@@ -14,7 +15,8 @@ import { subscriptionChecker } from "./lib/subcriptionChecker.js"
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import bidRouter from "./routes/users/bids.js"
-// import paymentPlan from "./routes/admin/paymentPlan.js"
+import paymentPlan from "./routes/admin/paymentPlan.js"
+
 
 
 
@@ -95,7 +97,7 @@ app.get("/", async (req, res) => {
 app.get("/getImage", (req, res) => {})
 
 //Admin
-// app.use("/admin/v1/payment-plan",paymentPlan)
+app.use("/admin/v1/payment-plan",paymentPlan)
 
 
 //Users
