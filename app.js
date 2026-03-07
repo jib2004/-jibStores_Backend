@@ -2,26 +2,24 @@ import express from "express"
 import dotenv from "dotenv"
 import cors from "cors"
 import cookieParser from "cookie-parser"
-// import multer from 'multer'
-// import path from 'path'
-// import fs from 'fs'
 import * as url from "url"
 import authRouter from "./routes/users/auth.js"
 import connectDb from "./middleware/connectDb.js"
 import { sellerRoute } from "./routes/users/seller.js"
 import { buyerRoute } from "./routes/users/buyer.js"
 import bodyParser from "body-parser"
-import http from "http"
-import { Server } from "socket.io"
+
+
 import { subscriptionChecker } from "./lib/subcriptionChecker.js"
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
-// import bidRouter from "./routes/users/bids.js"
+import bidRouter from "./routes/users/bids.js"
 // import { getRedisClient } from "./lib/redisConnection.js"
 // import { client } from "./lib/redisConnection.js"
 import paymentPlan from "./routes/admin/paymentPlan.js"
+// import  {getRedisClient}  from "./lib/redisConnection.js"
 
-
+console.log("App starting...");
 // Initialize dotenv first
 dotenv.config()
 const allowedOrigins = [
@@ -40,14 +38,7 @@ const limiter = rateLimit({
 export const redis_url = process.env.REDIS_URL
 
 const app = express()
-const server = http.createServer(app)
-const io = new Server(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"],
-    credentials: true,
-  },
-})
+
 
 const __dirname = url.fileURLToPath(new URL(".", import.meta.url))
 app.use(express.json())
@@ -68,8 +59,9 @@ app.use(
 )
 app.use(cookieParser())
 
-// Middleware to ensure database connection on each request
+//Middleware to ensure database connection on each request
 app.use(async (req, res, next) => {
+  console.log('DB Connecting...')
   try {
     await connectDb(process.env.MONGODB_URI)
     next()
@@ -79,22 +71,25 @@ app.use(async (req, res, next) => {
   }
 })
 
+
+// connectDb(process.env.MONGODB_URI)
+
 // Start the subscription checker cron job
 subscriptionChecker.start()
 
 app.use(express.static("uploads")) // allows you access this file
 
-app.get("/", (req, res) => {
-  res.send("Hello World")
+app.get("/", async (req, res) => {
+  try {
+    res.send("Hello World")
+  } catch (error) {
+    res.status(500).json({
+      message: `Internal Server Error ${e}`
+    })
+  }
+    
 })
 
-io.on("connection", (socket) => {
-  console.log("Client connected:", socket.id)
-
-  socket.on("connect_error", (error) => {
-    console.error("Connection error:", error)
-  })
-})
 
 app.get("/getImage", (req, res) => {})
 
@@ -106,7 +101,7 @@ app.use("/admin/v1/payment-plan",paymentPlan)
 app.use("/auth", authRouter)
 app.use("/seller", sellerRoute)
 app.use("/buyer", buyerRoute)
-// app.use("/user/v1/bids", bidRouter)
+app.use("/user/v1/bids", bidRouter)
 
 // For local development
 if (process.env.NODE_ENV !== "production") {
