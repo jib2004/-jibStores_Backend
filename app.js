@@ -14,7 +14,9 @@ import { subscriptionChecker } from "./lib/subcriptionChecker.js"
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import bidRouter from "./routes/users/bids.js"
-import paymentPlan from "./routes/admin/paymentPlan.js"
+// import paymentPlan from "./routes/admin/paymentPlan.js"
+
+
 
 console.log("App starting...");
 // Initialize dotenv first
@@ -32,9 +34,9 @@ const limiter = rateLimit({
 });
 
 
-export const redis_url = process.env.REDIS_URL
 
 const app = express()
+
 
 
 const __dirname = url.fileURLToPath(new URL(".", import.meta.url))
@@ -56,6 +58,8 @@ app.use(
 )
 app.use(cookieParser())
 
+
+
 //Middleware to ensure database connection on each request
 app.use(async (req, res, next) => {
   console.log('DB Connecting...')
@@ -72,7 +76,7 @@ app.use(async (req, res, next) => {
 // connectDb(process.env.MONGODB_URI)
 
 // Start the subscription checker cron job
-// subscriptionChecker.start()
+subscriptionChecker.start()
 
 app.use(express.static("uploads")) // allows you access this file
 
@@ -91,7 +95,7 @@ app.get("/", async (req, res) => {
 app.get("/getImage", (req, res) => {})
 
 //Admin
-app.use("/admin/v1/payment-plan",paymentPlan)
+// app.use("/admin/v1/payment-plan",paymentPlan)
 
 
 //Users

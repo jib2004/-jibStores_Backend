@@ -1,7 +1,14 @@
 import Flutterwave from 'flutterwave-node-v3'
-import dotenv from 'dotenv'
 
+let flwInstance = null
 
-dotenv.config()
+export const getFlw = () => {
+  if (flwInstance) return flwInstance
 
-export const flw = new Flutterwave(process.env.FLW_PUBLIC_KEY, process.env.FLW_SECRET_KEY)
+  if (!process.env.FLW_PUBLIC_KEY || !process.env.FLW_SECRET_KEY) {
+    throw new Error('Flutterwave keys are missing from environment variables')
+  }
+
+  flwInstance = new Flutterwave(process.env.FLW_PUBLIC_KEY, process.env.FLW_SECRET_KEY)
+  return flwInstance
+}
