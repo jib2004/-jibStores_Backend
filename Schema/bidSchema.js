@@ -63,6 +63,6 @@ const bidSchema = new mongoose.Schema({
 
 const Bid = mongoose.model("bids",bidSchema);
 
-// mongoose.
+
 
 export default Bid;

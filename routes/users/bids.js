@@ -8,6 +8,32 @@ import { client } from "../../configurations/redisConfig.js";
 
 const bidRouter = express.Router()
 
+bidRouter.get('/get-all-products',async(req,res)=>{
+    try {
+        const products = await client.lRange('userBids',0,-1)
+        
+        if(!products){
+            return res.status(StatusCodes.NOT_FOUND).json({
+            status:false,
+            message:'No Products Found!'
+        })
+        }
+
+        return res.status(StatusCodes.OK).json({
+            status:true,
+            message:'Successful',
+            data: products
+        })
+    } catch (error) {
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status:false,
+            message: `Internal Server Error: ${error}`
+        })
+    }
+
+})
+
+
 bidRouter.post('/create-bid/:id', async(req,res)=>{
     const {id} = req.params
     const {name,description,startingPrice,image,endTime} = req.body
@@ -30,14 +56,14 @@ bidRouter.post('/create-bid/:id', async(req,res)=>{
             })        
         }
 
-        const isUserPaid = await Bid.findOne({userId:user.id})
+        // const isUserPaid = await Bid.findOne({userId:user.id})
 
-        if(!isUserPaid || !isUserPaid.isPaid){
-            return res.status(StatusCodes.UNAUTHORIZED).json({
-                status:false,
-                message:"Only users who have paid can place a bid" 
-            })
-        }
+        // if(!isUserPaid || !isUserPaid.isPaid){
+        //     return res.status(StatusCodes.UNAUTHORIZED).json({
+        //         status:false,
+        //         message:"Only users who have paid can place a bid" 
+        //     })
+        // }
 
         await client.hSet(`user:${id}-${randomString}`,{
             name,
@@ -51,11 +77,12 @@ bidRouter.post('/create-bid/:id', async(req,res)=>{
             
         })
 
+
+
         const getHash = await client.hGetAll(`user:${id}-${randomString}`)
 
         const bidCache = await client.set(`user:${id}-${randomString}`,JSON.stringify(getHash))
-
-        
+        await client.lPush('userBids',JSON.stringify(getHash))
 
 
     if(bidCache){
@@ -67,7 +94,7 @@ bidRouter.post('/create-bid/:id', async(req,res)=>{
             endTime,
             userId:user._id,
             reference:randomString,
-            startTime:date.toLocaleString()
+            
         })
 
         return res.status(StatusCodes.OK).json({

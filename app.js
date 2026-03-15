@@ -74,9 +74,6 @@ app.use(async (req, res, next) => {
   }
 })
 
-
-// connectDb(process.env.MONGODB_URI)
-
 // Start the subscription checker cron job
 subscriptionChecker.start()
 
