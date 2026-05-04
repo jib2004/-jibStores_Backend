@@ -73,7 +73,10 @@ bidRouter.post('/create-bid/:id', async(req,res)=>{
             endTime,
             description,
             userId:id,
-            startTime:date.toLocaleString(), 
+            userName:user.name,
+            email:user.email,
+            startTime:date.toLocaleString(),
+            reference:randomString
             
         })
 
@@ -153,8 +156,6 @@ bidRouter.get('/get-bid/:id/:reference',async(req,res)=>{
 bidRouter.put('/place-bid/:id',async(req,res)=>{
     const {id} = req.params //id must be the 
     const {bidderId,amount} = req.body
-
-
 
     try {
         // const client = await getRedisClient();
