@@ -14,7 +14,6 @@ import bodyParser from "body-parser"
 import { subscriptionChecker } from "./lib/subcriptionChecker.js"
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
-import bidRouter from "./routes/users/bids.js"
 import paymentPlan from "./routes/admin/paymentPlan.js"
 
 
@@ -101,7 +100,7 @@ app.use("/admin/v1/payment-plan",paymentPlan)
 app.use("/auth", authRouter)
 app.use("/seller", sellerRoute)
 app.use("/buyer", buyerRoute)
-app.use("/user/v1/bids", bidRouter)
+
 
 // For local development
 if (process.env.NODE_ENV !== "production") {
