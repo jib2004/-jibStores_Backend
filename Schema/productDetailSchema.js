@@ -43,7 +43,12 @@ const productSchema = new Schema({
         }
     },  
     reviews:{
-        type:[String],
+        type:[
+            {
+                userId: mongoose.Schema.Types.ObjectId,
+                review:String
+            } 
+        ],
         default:[]
     },
     numOfReviews:{
@@ -91,6 +96,11 @@ const productSchema = new Schema({
         createdAt:"created_at",
         updatedAt:"updated_at"
     }
+})
+
+productSchema.index({
+    sellerId:1,
+    sellerName:1
 })
 
 productSchema.index({

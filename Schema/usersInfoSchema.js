@@ -56,7 +56,8 @@ const userSchema = new Schema({
         default:[],
     },
     profilePicture:{
-        type:String,
+        type:[String],
+        default:[]
         
     },
     isChangedPassword:{
@@ -149,6 +150,7 @@ const userSchema = new Schema({
 
 userSchema.index({email:1})
 userSchema.index({isSeller:1})
+
 
 
 export const userModel = model('users',userSchema)

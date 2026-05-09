@@ -31,7 +31,7 @@ sellerRoute.get('/product/:id',verify ,async(req,res)=>{
             message:"Internal Server Error: " + error
         })
     }
-})
+}) 
 
 
 sellerRoute.get('/review/product/:sellerId/:id',verify,async(req,res)=>{
@@ -40,7 +40,13 @@ sellerRoute.get('/review/product/:sellerId/:id',verify,async(req,res)=>{
         return res.status(StatusCodes.BAD_REQUEST).json({message:"Invalid id"})
     }
     try {
-        const product = await productModel.findById(id)
+        const product = await productModel.findById(id).select({
+            _id:1,
+            sellerId:1,
+            rating:1,
+            reviews:1,
+            numOfReviews:1
+        })
         if(!product){
             return res.status(StatusCodes.NOT_FOUND).json({message:"No product found"})
         }
@@ -180,13 +186,16 @@ sellerRoute.post('/product/:id',verify,async(req,res)=>{
     }
 
 })
-
+ 
 
 
 sellerRoute.get('/dashboard/:id',verify,async(req,res)=>{
     const {id} = req.params
     try {
-        const user = await userModel.findById(id,{isSeller:true})
+        const user = await userModel.findById(id).select({
+            _id:1,
+            isSeller:1
+        })
        const products = await productModel.find({sellerId:id})
         if(!user){
            return res.status(404).json({message:'user not found'})
@@ -213,25 +222,26 @@ sellerRoute.get('/dashboard/:id',verify,async(req,res)=>{
     }
 })
 
-sellerRoute.put('/product/:sellerId/:id',verify,async(req,res)=>{
+// {raw or form data}
+sellerRoute.put('/product/:sellerId/:id',verify,upload.array('files',12),async(req,res)=>{
     const {id,sellerId} = req.params
-    const {sellerName,title,price,description,image,category,stock,isDisCount,discountedPrice,keywords} = req.body
-    if(!sellerName || !title || !price || !description || !image || !category || !stock){
-        return res.status(400).json({
-            message:'Kindly fill in the field',
-        })
-    }
-
-
-
-
+    const {title,price,description,image,category,stock,isDisCount,discountedPrice,keywords,fileLink} = req.body
+    const files = req.files;
+    const images = undefined;
 
     try {
+
+        if(fileLink){
+            images = await imageUrlUploader(fileLink)
+        }else{
+            images = await imageUrlUploader(files)
+        }
+
        const product = await productModel.findByIdAndUpdate(id,{
         title,
         price,
         description,
-        image,
+        image:images,
         category,
         stock,
         isDisCount,
@@ -277,14 +287,31 @@ sellerRoute.delete('/product/:sellerId/:id',verify,async(req,res)=>{
         })
     }
     try {
-        const product = await productModel.findByIdAndDelete(id)
-        await imageDelete(product.image)
-        if(sellerId !== product.sellerId.toString()){
+        const user =await userModel.findById(sellerId).select({
+            name:1
+        })
+
+        const productId =await productModel.findById(id)
+
+        if(!productId){
+            return res.status(StatusCodes.NOT_FOUND).json({
+                status:false,
+                message:"Not Found!"
+            })
+        }
+        
+        if(user.name !== productId.sellerName){
             return res.status(StatusCodes.UNAUTHORIZED).json({
                 message: 'You are unauthorized to delete this'
             })
         }
-        await imageDelete(product.image)
+        await imageDelete(productId?.image)
+
+
+        
+        const product = await productModel.findByIdAndDelete(id)
+
+        
         return res.status(200).json({
             message:'Product deleted successfully',
             data:product
@@ -297,6 +324,11 @@ sellerRoute.delete('/product/:sellerId/:id',verify,async(req,res)=>{
 })
 
 
+/*
+Changes that needs to be made here
+- I need to integrate paystack to collect payment and also update
+plan
+*/
 sellerRoute.put('/register/:id',verify,async(req,res)=>{
     const {id} = req.params
     const {plan} = req.body
@@ -325,7 +357,7 @@ sellerRoute.post('/delete-image-id',verify, async(req,res)=>{
     try {
         await imageDelete([id])
         return res.status(StatusCodes.OK).json({
-            message:'This was successfully deleted'
+            message:'This image was successfully deleted'
         })
     } catch (error) {
         return res.status(500).json({
@@ -341,7 +373,10 @@ sellerRoute.get('/orders/users/:sellerId',verify,async(req,res)=>{
     try {
         const userOrders = await Order.find({
             'productDetails.sellerId':sellerId
-        })
+        }).populate("buyerId", "name email address phoneNumber")
+
+
+        console.log(userOrders)
 
         // console.log(userOrders[0].productDetails[0].sellerId.toString(), sellerId)
         // console.log(userOrders)

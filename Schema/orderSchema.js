@@ -3,12 +3,8 @@ import mongoose, { Schema,model } from "mongoose";
 const orderSchema = new Schema({
     buyerId:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:'user',
+        ref:'users',
     },
-    // sellerId:{
-    //     type:mongoose.Schema.Types.ObjectId,
-    //     ref:'user',
-    // },// Using socket.io to send notification to the seller email  through emit
     address:{
         type:String,
         require:true

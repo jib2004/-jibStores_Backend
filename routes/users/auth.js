@@ -12,6 +12,7 @@ import { upload } from '../../middleware/multer.js'
 import { imageUrlUploader } from '../../middleware/imageUrlConverter.js'
 import { StatusCodes } from 'http-status-codes'
 import { stat } from 'fs'
+import { imageDelete } from '../../middleware/cloudinaryDelete.js'
 
 
 
@@ -31,7 +32,7 @@ authRouter.post('/register', upload.array('profile',1) ,async(req,res)=>{
     const hashedPassword =  bcrypt.hashSync(password, 10)
     let hashedNumber =  ""
     if(hashedNumber){
-        return    hashedNumber = bcrypt.hashSync(phoneNumber,10)
+        return   hashedNumber = bcrypt.hashSync(phoneNumber,10)
     }
     let hashedAddress =""
 
@@ -49,18 +50,15 @@ authRouter.post('/register', upload.array('profile',1) ,async(req,res)=>{
             name,
             email,
             password:hashedPassword,
-            phoneNumber:hashedNumber,
-            address:hashedAddress ,
-            
         })
 
-        const token =jwt.sign({userEmail:user.email,userId:user._id},process.env.JWT_SECRET_KEY,{expiresIn:"30d" })
-            res.cookie("token",token,{
-                httpOnly:true,
-                secure: true,
-                sameSite: 'none',
-                // maxAge: 24 * 60 * 60 * 1000 
-            }).json({message:"Successfully logged in"})
+        // const token =jwt.sign({userEmail:user.email,userId:user._id},process.env.JWT_SECRET_KEY,{expiresIn:"30d" })
+        //     res.cookie("token",token,{
+        //         httpOnly:true,
+        //         secure: true,
+        //         sameSite: 'none',
+        //         // maxAge: 24 * 60 * 60 * 1000 
+        //     }).json({message:"Successfully logged in"})
     
         return res.status(201).json({ 
             message:"User created successfully",
@@ -88,7 +86,7 @@ authRouter.post('/login',async(req,res)=>{
                 httpOnly:true,
                 secure: true, 
                 sameSite: 'none',
-                // maxAge: 24 * 60 * 60 * 1000 
+                maxAge: 30 * 24 * 60 * 60 * 1000
             }).json({message:"Successfully logged in",data:user})
         } catch (error) {
             return res.status(400).json({message:"Invalid email or password"})
@@ -112,8 +110,67 @@ authRouter.get('/user-info/:id',verify,async(req,res)=>{
     } catch (error) {
         return res.status(500).json({message:`Internal server error: ${error}`})
     }
+})
 
-  })
+authRouter.put('/profile/:id',verify,upload.array('files',1),async(req,res)=>{
+    const {id} = req.params
+    const {name,email,password,phoneNumber,address} = req.body
+    let  profilePicture;
+    let files = req.files
+    
+    try {
+        let encryptedPassword;
+
+        if(email && !email?.includes('@')){
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                status:false,
+                message:"This is an email @"
+            })
+        }
+
+        if (files){
+            profilePicture = await imageUrlUploader(files)
+        }
+
+        const userExists = await userModel.findById(id)
+        if(!userExists){
+            return res.status(StatusCodes.NOT_FOUND).json({
+                status:false,
+                message:"User Not Found!"
+            })
+        }
+
+         if(password && password?.length < 8) return res.status(400).json({messge:"Password too short"})
+        
+        if(password){
+            encryptedPassword = bcrypt.hashSync(password,10)
+        }
+
+        const updatedInfo =await userModel.findByIdAndUpdate(id,{
+            name: name ? name: userExists.name,
+            email: email ? email: userExists.email,
+            password:password ? encryptedPassword : userExists.password,
+            phoneNumber:phoneNumber ? phoneNumber : userExists.phoneNumber,
+            address:address ? address : userExists.address,
+            profilePicture:profilePicture ? profilePicture : userExists.profilePicture
+        },{new:true})
+        // .select({
+        //     password:1
+        // })
+
+        return res.status(StatusCodes.OK).json({
+            status:true,
+            message:"Successfully Updated!",
+              name,
+            password,
+            profilePicture,
+            data:updatedInfo,
+          
+        })
+    } catch (error) {
+        return res.status(500).json({message:`Internal server error: ${error}`})
+    }
+})
 
 
 authRouter.post("/send-otp",async(req,res)=>{
@@ -244,10 +301,10 @@ authRouter.put('/forgot-password',async(req,res)=>{
             password:newHashedPassword
         },{new:true})
         if(user && user.isChangedPassword){
-            return res.status(200).json({message:"Password updated successfully",data:{
-                email:user.email,
-                password:user.password
-            }})
+            return res.status(200).json({
+                status:false,
+                message:"Password updated successfully"
+            })
         }
 
     } catch (error) {
@@ -328,9 +385,12 @@ authRouter.put('/user/:id',async(req,res)=>{
 authRouter.delete('/user/:id',verify,async(req,res)=>{
     const {id} = req.params
     try {
+        const userInfo = await userModel.findById(id)
+        await imageDelete(userInfo.profilePicture)
         const user = await userModel.findByIdAndDelete(id)
+        res.clearCookie("token")
         if(user){
-            return res.status(StatusCodes.OK).json({message:"User updated successfully",data:user})
+            return res.status(StatusCodes.OK).json({message:"User updated successfully"})
         }else{
             return res.status(StatusCodes.NOT_FOUND).json({message:"User not found"})
         }
@@ -490,6 +550,7 @@ authRouter.post('/cookie-check',verify,(req,res)=>{
 
 
 authRouter.post('/logout',(req,res)=>{
+    
     res.clearCookie("token")
     return res.status(200).json({message:"Logged out successfully"})
 })

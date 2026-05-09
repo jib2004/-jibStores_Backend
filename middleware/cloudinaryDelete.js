@@ -10,6 +10,7 @@ export const imageDelete = async(files) =>{
 
     for(const file of files){
         await cloudinary.uploader.destroy(file)
+        .catch(e => console.log(e))
     }
 }
 
