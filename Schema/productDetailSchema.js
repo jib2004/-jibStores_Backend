@@ -45,7 +45,7 @@ const productSchema = new Schema({
     reviews:{
         type:[
             {
-                userId: mongoose.Schema.Types.ObjectId,
+                userId: {type:mongoose.Schema.Types.ObjectId , ref:'users'},
                 review:String
             } 
         ],
@@ -100,7 +100,11 @@ const productSchema = new Schema({
 
 productSchema.index({
     sellerId:1,
-    sellerName:1
+    sellerName:1,
+})
+
+productSchema.index({
+    reviews:1
 })
 
 productSchema.index({

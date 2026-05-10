@@ -45,7 +45,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
-app.use(limiter); // Apply the rate limiting middleware to all requests
+// app.use(limiter); // Apply the rate limiting middleware to all requests
 app.use(helmet()); // Apply security headers
 
 

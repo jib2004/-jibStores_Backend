@@ -24,7 +24,7 @@ buyerRoute.get('/product',async(req,res)=>{
                 isSold:0,
                 sellerId:0,
                 created_at:0
-        })
+        }).limit(5)
         if (!products || products.length === 0) {
             return res.status(404).json({ message: "No products found." });
         }
@@ -369,4 +369,86 @@ buyerRoute.get('/search/:query',async(req,res)=>{ // Fastest Response Time in th
 /*
 Writing a code to allow buyers to make reviews to products
 */
+buyerRoute.post('/review/:productId/:userId',verify,async(req,res)=>{
+    const {userId,productId} = req.params
+    const {review} = req.body
+    try{
+        if(!review){
+        return res.status(StatusCodes.BAD_REQUEST).json({
+            status:false,
+            message:"Kindly enter a review"
+        })
+    }
 
+    if(review.length  < 4){
+        return res.status(StatusCodes.BAD_REQUEST).json({
+            status:false,
+            message:"Your review is too short"
+        })}
+
+        const userReview = await productModel.findByIdAndUpdate(productId,{
+            $push:{
+                reviews:{
+                    userId,
+                    review
+                }
+            }
+        },{new:true}).select({
+            _id:1,
+            reviews:1
+        })
+
+        // ✅ catch null early
+if (!userReview) {
+    return res.status(StatusCodes.NOT_FOUND).json({
+        status: false,
+        message: "Product not found!"
+    })
+}
+        return res.status(201).json({
+            status:true,
+            statusCode:201,
+            message:"Review Made!",
+            data:userReview
+        })
+    }catch(e){
+        return res.status(500).json({
+            message: "Internal Server Error: " + error
+        });
+    }
+})
+
+
+//get reviews
+buyerRoute.get("/reviews/:productId",verify,async(req,res)=>{
+    const {productId} = req.params
+
+    try {
+        const product = await productModel.findById(productId).limit(5).populate({
+             path: "reviews.userId",  // ✅ dot notation for nested array
+            select: "name profilePicture" // fields you want from the user
+        }).select({
+            reviews:1
+        })
+
+        if(!product){
+            return res.status(StatusCodes.NOT_FOUND).json({
+            status:false,
+            statusCode:404,
+            message:"Not Found!",
+            })
+        }
+
+        return res.status(StatusCodes.OK).json({
+             status:true,
+            statusCode:200,
+            message:"Reviews Fetch Successful!",
+            data:product
+        })
+
+    } catch (error) {
+        return res.status(500).json({
+            message: "Internal Server Error: " + error
+        });
+    }
+})
