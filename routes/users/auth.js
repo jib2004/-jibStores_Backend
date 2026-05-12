@@ -114,7 +114,7 @@ authRouter.get('/user-info/:id',verify,async(req,res)=>{
 
 authRouter.put('/profile/:id',verify,upload.array('files',1),async(req,res)=>{
     const {id} = req.params
-    const {name,email,password,phoneNumber,address} = req.body
+    const {name,email,password,newPassword,phoneNumber,address} = req.body
     let  profilePicture;
     let files = req.files
     
@@ -128,6 +128,7 @@ authRouter.put('/profile/:id',verify,upload.array('files',1),async(req,res)=>{
             })
         }
 
+
         if (files){
             profilePicture = await imageUrlUploader(files)
         }
@@ -140,30 +141,41 @@ authRouter.put('/profile/:id',verify,upload.array('files',1),async(req,res)=>{
             })
         }
 
-         if(password && password?.length < 8) return res.status(400).json({messge:"Password too short"})
+        if(profilePicture?.length > 0){
+            await imageDelete(userExists.profilePicture)
+        }
+
+         if(password && newPassword && newPassword?.length < 8) return res.status(400).json({messge:"Password too short"})
+
+        const isPassword = bcrypt.compareSync(password,userExists.password)
+
+        if(!isPassword){
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                status:false,
+                message:"Invalid Password"
+            })
+        }
         
-        if(password){
-            encryptedPassword = bcrypt.hashSync(password,10)
+        if(password && newPassword){
+            encryptedPassword = bcrypt.hashSync(newPassword,10)
         }
 
         const updatedInfo =await userModel.findByIdAndUpdate(id,{
             name: name ? name: userExists.name,
             email: email ? email: userExists.email,
-            password:password ? encryptedPassword : userExists.password,
+            password: password && newPassword ? encryptedPassword : userExists.password,
             phoneNumber:phoneNumber ? phoneNumber : userExists.phoneNumber,
             address:address ? address : userExists.address,
-            profilePicture:profilePicture ? profilePicture : userExists.profilePicture
+            profilePicture:profilePicture?.length > 0 ? profilePicture : userExists.profilePicture,
+            
         },{new:true})
-        // .select({
-        //     password:1
-        // })
+        .select({
+            password:0
+        })
 
         return res.status(StatusCodes.OK).json({
             status:true,
             message:"Successfully Updated!",
-              name,
-            password,
-            profilePicture,
             data:updatedInfo,
           
         })
