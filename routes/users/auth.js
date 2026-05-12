@@ -156,7 +156,7 @@ authRouter.put('/profile/:id',verify,upload.array('files',1),async(req,res)=>{
             })
         }
         
-        if(password && newPassword){
+        if(newPassword && newPassword.trim().length > 0){
             encryptedPassword = bcrypt.hashSync(newPassword,10)
         }
 
