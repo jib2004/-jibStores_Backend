@@ -327,7 +327,9 @@ buyerRoute.post('/create-order/:id',verify,async(req,res)=>{
 
 buyerRoute.get('/order/:id',verify,async(req,res)=>{
     const {id} = req.params
-    if(!id){
+
+    try {
+        if(!id){
         return res.status(StatusCodes.BAD_REQUEST).json({
             message:'User ID is required'
         })
@@ -340,6 +342,12 @@ buyerRoute.get('/order/:id',verify,async(req,res)=>{
         message:'Successful',
         data:buyerOrders
     })
+    } catch (error) {
+        return res.status(500).json({
+            message: "Internal Server Error: " + error
+        });
+    }
+    
 
 
 })
@@ -411,7 +419,7 @@ if (!userReview) {
             message:"Review Made!",
             data:userReview
         })
-    }catch(e){
+    }catch(error){
         return res.status(500).json({
             message: "Internal Server Error: " + error
         });

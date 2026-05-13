@@ -39,4 +39,7 @@ const orderSchema = new Schema({
 })
 
 
+orderSchema.index({buyerId:1})
+
+
 export const Order = model('order', orderSchema)
