@@ -114,13 +114,11 @@ authRouter.get('/user-info/:id',verify,async(req,res)=>{
 
 authRouter.put('/profile/:id',verify,upload.array('files',1),async(req,res)=>{
     const {id} = req.params
-    const {name,email,password,newPassword,phoneNumber,address} = req.body
+    const {name,email,phoneNumber,address} = req.body
     let  profilePicture;
     let files = req.files
     
     try {
-        let encryptedPassword;
-
         if(email && !email?.includes('@')){
             return res.status(StatusCodes.BAD_REQUEST).json({
                 status:false,
@@ -145,25 +143,11 @@ authRouter.put('/profile/:id',verify,upload.array('files',1),async(req,res)=>{
             await imageDelete(userExists.profilePicture)
         }
 
-         if(password && newPassword && newPassword?.length < 8) return res.status(400).json({messge:"Password too short"})
-
-        const isPassword = bcrypt.compareSync(password,userExists.password)
-
-        if(!isPassword){
-            return res.status(StatusCodes.BAD_REQUEST).json({
-                status:false,
-                message:"Invalid Password"
-            })
-        }
-        
-        if(newPassword && newPassword.trim().length > 0){
-            encryptedPassword = bcrypt.hashSync(newPassword,10)
-        }
+         
 
         const updatedInfo =await userModel.findByIdAndUpdate(id,{
             name: name ? name: userExists.name,
             email: email ? email: userExists.email,
-            password: password && newPassword ? encryptedPassword : userExists.password,
             phoneNumber:phoneNumber ? phoneNumber : userExists.phoneNumber,
             address:address ? address : userExists.address,
             profilePicture:profilePicture?.length > 0 ? profilePicture : userExists.profilePicture,
@@ -179,6 +163,109 @@ authRouter.put('/profile/:id',verify,upload.array('files',1),async(req,res)=>{
             data:updatedInfo,
           
         })
+    } catch (error) {
+        return res.status(500).json({message:`Internal server error: ${error}`})
+    }
+})
+
+/*
+Solution:Internal server error: Error: data and hash arguments required
+It is always trying to hash newPassword when when it is not there
+Creating a new Route to handle
+let encryptedPassword;
+        if(!password || !newPassword || confirmPassword){
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                status:false,
+                message:"Kindly all field!"
+            })
+
+            if(newPassword !== confirmPassword){
+                return res.status(StatusCodes.BAD_REQUEST).json({
+                status:false,
+                message:`Password not alike!!`
+            })
+            }
+
+        const userExists = await userModel.findById(id)
+        if(!userExists){
+            return res.status(StatusCodes.NOT_FOUND).json({
+                status:false,
+                message:"User Not Found!"
+            })
+        }
+
+        if(password && newPassword && newPassword?.length < 8) return res.status(400).json({messge:"Password too short"})
+
+        const isPassword = bcrypt.compareSync(password,userExists.password)
+
+        if(!isPassword){
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                status:false,
+                message:"Invalid Password"
+            })
+        }
+        
+        if(newPassword && newPassword.trim().length > 0){
+            encryptedPassword = bcrypt.hashSync(newPassword,10)
+        }
+// ,
+
+        }
+*/
+
+authRouter.put("/password-change/:id",verify,async(req,res)=>{
+    const {id} = req.params
+    const {password,newPassword,confirmPassword} = req.body
+    try {
+        let encryptedPassword;
+        if(!password || !newPassword || !confirmPassword){
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                status:false,
+                message:"Kindly all field!"
+            })}
+
+               if(newPassword !== confirmPassword){
+                return res.status(StatusCodes.BAD_REQUEST).json({
+                status:false,
+                message:`Password not alike!!`
+            })
+            }
+
+        const userExists = await userModel.findById(id)
+        if(!userExists){
+            return res.status(StatusCodes.NOT_FOUND).json({
+                status:false,
+                message:"User Not Found!"
+            })
+        }
+
+        if(password && newPassword && newPassword?.length < 8) return res.status(400).json({messge:"Password too short"})
+
+        const isPassword = bcrypt.compareSync(password,userExists.password)
+
+        if(!isPassword){
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                status:false,
+                message:"Invalid Password"
+            })
+        }
+        
+        if(newPassword && newPassword.trim().length > 0){
+            encryptedPassword = bcrypt.hashSync(newPassword,10)
+        }
+
+         await userModel.findByIdAndUpdate(id,{
+            password: password && newPassword ? encryptedPassword : userExists.password
+        },{new:true})
+        
+
+
+         return res.status(StatusCodes.OK).json({
+            status:true,
+            message:"Password Updated!",
+        })
+
+        
     } catch (error) {
         return res.status(500).json({message:`Internal server error: ${error}`})
     }
