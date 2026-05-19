@@ -327,6 +327,10 @@ buyerRoute.post('/create-order/:id',verify,async(req,res)=>{
 
 buyerRoute.get('/order/:id',verify,async(req,res)=>{
     const {id} = req.params
+    const page = parseInt(req.query.page) || 1
+    const limit = parseInt(req.query.limit) || 10
+
+    const skip = (page - 1) * limit
 
     try {
         if(!id){
@@ -335,12 +339,19 @@ buyerRoute.get('/order/:id',verify,async(req,res)=>{
         })
     }
 
+    const totalOrder = await Order.countDocuments({
+        buyerId:id
+    })
+
     const buyerOrders = await Order.find({buyerId:id.toString()}).select({
         reference:0,
-    })
+    }).skip(skip).limit(limit)
     return res.status(StatusCodes.OK).json({
         message:'Successful',
-        data:buyerOrders
+        data:buyerOrders,
+        page,
+        totalOrder,
+        totalPages: Math.ceil(totalOrder / limit),
     })
     } catch (error) {
         return res.status(500).json({
