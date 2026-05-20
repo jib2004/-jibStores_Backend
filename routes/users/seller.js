@@ -40,13 +40,14 @@ sellerRoute.get('/review/product/:sellerId/:id',verify,async(req,res)=>{
         return res.status(StatusCodes.BAD_REQUEST).json({message:"Invalid id"})
     }
     try {
-        const product = await productModel.findById(id).select({
-            _id:1,
-            sellerId:1,
-            rating:1,
-            reviews:1,
-            numOfReviews:1
-        })
+        const product = await productModel.findById(id)
+        // .select({
+        //     _id:1,
+        //     sellerId:1,
+        //     rating:1,
+        //     reviews:1,
+        //     numOfReviews:1
+        // })
         if(!product){
             return res.status(StatusCodes.NOT_FOUND).json({message:"No product found"})
         }
